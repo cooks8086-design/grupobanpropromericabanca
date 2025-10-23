@@ -1,0 +1,1726 @@
+/*\
+|*|
+|*|  :: cookies.js ::
+|*|
+|*|  A complete cookies reader/writer framework with full unicode support.
+|*|
+|*|  Revision #1 - September 4, 2014
+|*|
+|*|  https://developer.mozilla.org/en-US/docs/Web/API/document.cookie
+|*|  https://developer.mozilla.org/User:fusionchess
+|*|
+|*|  This framework is released under the GNU Public License, version 3 or later.
+|*|  http://www.gnu.org/licenses/gpl-3.0-standalone.html
+|*|
+|*|  Syntaxes:
+|*|
+|*|  * DealeronCookie.setItem(name, value[, end[, path[, domain[, secure]]]])
+|*|  * DealeronCookie.getItem(name)    * NOTE: if cookie value is empty string, null is returned
+|*|  * DealeronCookie.removeItem(name[, path[, domain]])
+|*|  * DealeronCookie.hasItem(name)
+|*|  * DealeronCookie.keys()
+|*|
+\*/
+
+var DealeronCookie = {
+  getItem: function (sKey) {
+    if (!sKey) {
+      return null;
+    }
+    return (
+      decodeURIComponent(
+        document.cookie.replace(
+          new RegExp(
+            "(?:(?:^|.*;)\\s*" +
+              encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") +
+              "\\s*\\=\\s*([^;]*).*$)|^.*$"
+          ),
+          "$1"
+        )
+      ) || null
+    );
+  },
+  setItem: function (sKey, sValue, vEnd, sPath, sDomain, bSecure) {
+    if (!sKey || /^(?:expires|max\-age|path|domain|secure)$/i.test(sKey)) {
+      return false;
+    }
+    var sExpires = "";
+    if (vEnd) {
+      switch (vEnd.constructor) {
+        case Number:
+          sExpires =
+            vEnd === Infinity
+              ? "; expires=Fri, 31 Dec 9999 23:59:59 GMT"
+              : "; max-age=" + vEnd;
+          break;
+        case String:
+          sExpires = "; expires=" + vEnd;
+          break;
+        case Date:
+          sExpires = "; expires=" + vEnd.toUTCString();
+          break;
+      }
+    }
+    document.cookie =
+      encodeURIComponent(sKey) +
+      "=" +
+      encodeURIComponent(sValue) +
+      sExpires +
+      (sDomain ? "; domain=" + sDomain : "") +
+      (sPath ? "; path=" + sPath : "") +
+      (bSecure ? "; secure" : "");
+    return true;
+  },
+  removeItem: function (sKey, sPath, sDomain) {
+    if (!this.hasItem(sKey)) {
+      return false;
+    }
+    document.cookie =
+      encodeURIComponent(sKey) +
+      "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" +
+      (sDomain ? "; domain=" + sDomain : "") +
+      (sPath ? "; path=" + sPath : "");
+    return true;
+  },
+  hasItem: function (sKey) {
+    if (!sKey) {
+      return false;
+    }
+    return new RegExp(
+      "(?:^|;\\s*)" +
+        encodeURIComponent(sKey).replace(/[\-\.\+\*]/g, "\\$&") +
+        "\\s*\\="
+    ).test(document.cookie);
+  },
+  hasValue: function (sKey) {
+    return this.hasItem(sKey) && this.getItem(sKey) !== null;
+  },
+  keys: function () {
+    var aKeys = document.cookie
+      .replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "")
+      .split(/\s*(?:\=[^;]*)?;\s*/);
+    for (var nLen = aKeys.length, nIdx = 0; nIdx < nLen; nIdx++) {
+      aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]);
+    }
+    return aKeys;
+  },
+};
+
+var DealerOn_Tracker = {
+  p1: DlronGlobal_DealerInfoPhone,
+  p2: DlronGlobal_DealerInfoPhone2,
+  cp1: DlronGlobal_DealerPhone1,
+  cp2: DlronGlobal_DealerPhone2,
+  trackerName: "dealerOn_tracker_" + DlronGlobal_DealerId,
+
+  ParameterByName: function (name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regexS = "[\\?&]" + name + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(window.location.search);
+    if (results == null) return "";
+    else return decodeURIComponent(results[1].replace(/\+/g, " "));
+  },
+  isBlank: function (str) {
+    return !str || /^\s*$/.test(str);
+  },
+  isEmpty: function (str) {
+    return !str || 0 === str.length;
+  },
+  hasValue: function (str) {
+    return !this.isBlank(str) && !this.isEmpty(str);
+  },
+  setValue: function (v, nv) {
+    var re = new RegExp(v, "gim");
+    var str = "";
+    var elm = document.getElementById("hHeader");
+    if (typeof elm != "undefined" && elm != null) {
+      str = elm.innerHTML;
+      var newstr = str.replace(re, nv);
+      elm.innerHTML = newstr;
+    }
+  },
+  setMobileValue: function (v, l, nv) {
+    var re = new RegExp(v, "gi");
+    var rel = new RegExp(l, "gi");
+    var newstr = "";
+    var elm = document.getElementById("mobileHeaderBlock");
+    if (typeof elm != "undefined" && elm != null) {
+      var str = elm.innerHTML;
+      newstr = str.replace(rel, "");
+      newstr = newstr.replace(re, nv);
+      elm.innerHTML = newstr;
+    }
+  },
+  secondsInMilliseconds: function (numseconds) {
+    return numseconds * 1000;
+  },
+  minutesInMilliseconds: function (numminutes) {
+    return this.secondsInMilliseconds(numminutes * 60);
+  },
+  hoursInMilliseconds: function (numhours) {
+    return this.minutesInMilliseconds(numhours * 60);
+  },
+  daysInMilliseconds: function (numdays) {
+    return this.hoursInMilliseconds(numdays * 24);
+  },
+  createCookie: function (name, value, minutes, days) {
+    var expiremilliseconds = 0;
+    if (days > 0) {
+      expiremilliseconds = this.daysInMilliseconds(days);
+    } else if (minutes > 0) {
+      expiremilliseconds = this.minutesInMilliseconds(minutes);
+    }
+    var currdate = new Date();
+    var expirationdate = new Date(currdate.getTime() + expiremilliseconds);
+    document.cookie =
+      name +
+      "=" +
+      value +
+      "; expires=" +
+      expirationdate.toGMTString() +
+      "; path=/";
+  },
+  parseGACookie: function () {
+    var cv = {};
+    var utmz = DealerOn_Tracker.readCookie("__utmz");
+    if (utmz != null && typeof utmz[1] != "undefined") {
+      utmz = utmz.replace(/^[0-9.]+/, "").split("|");
+      for (var c = 0, l = utmz.length; c < l; c++) {
+        var cn = utmz[c].split("=");
+        switch (cn[0]) {
+          case "utmcsr":
+            cv.source = cn[1].replace("%20", " ");
+          case "utmccn":
+            cv.campaignName = cn[1].replace("%20", " ");
+          case "utmcmd":
+            cv.medium = cn[1].replace("%20", " ");
+          case "utmctr":
+            cv.term = cn[1].replace("%20", " ");
+          case "utmcct":
+            cv.content = cn[1].replace("%20", " ");
+        }
+      }
+    }
+    return cv;
+  },
+  readCookie: function (name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(";");
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == " ") c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+    }
+    return null;
+  },
+  isMobile: function () {
+    var elm = document.getElementById("mobileHeaderBlock");
+    if (typeof elm != "undefined" && elm != null) return true;
+    else return false;
+  },
+};
+
+var DealerOn_ContentManagement = {
+  getElementsByClass: function (className, tag) {
+    if (!DealerOn_Tracker.hasValue(tag)) {
+      tag = "*";
+    }
+    var hasClassName = new RegExp("(?:^|\\s)" + className + "(?:$|\\s)");
+    var allElements = document.getElementsByTagName(tag);
+    var results = [];
+    var element;
+    for (var i = 0; (element = allElements[i]) != null; i++) {
+      var elementClass = element.className;
+      if (
+        elementClass &&
+        elementClass.indexOf(className) != -1 &&
+        hasClassName.test(elementClass)
+      ) {
+        results.push(element);
+      }
+    }
+    return results;
+  },
+  changeHtmlContentByClass: function (content, className, tag) {
+    var results = [];
+    results = this.getElementsByClass(className, tag);
+
+    for (var i = 0; i < results.length; i++) {
+      results[i].innerHTML = content;
+    }
+  },
+  changeHtmlContentByID: function (content, elementId) {
+    var element = document.getElementById(elementId);
+    if (typeof element != "undefined" && element != null) {
+      element.innerHTML = content;
+    }
+  },
+  addHtmlContentByClass: function (content, className, tag, position) {
+    var results = [];
+    results = this.getElementsByClass(className, tag);
+    for (var i = 0; i < results.length; i++) {
+      if (position == 1) {
+        results[i].innerHTML = content + results[i].innerHTML;
+      } else {
+        results[i].innerHTML = results[i].innerHTML + content;
+      }
+    }
+  },
+  appendHtmlContentByClass: function (
+    content,
+    className,
+    tag,
+    contentTag,
+    contentID
+  ) {
+    var results = [];
+    results = this.getElementsByClass(className, tag);
+    if (results.length > 0) {
+      // Added to first element found
+      var element = results[0];
+      if (!DealerOn_Tracker.hasValue(contentTag)) {
+        contentTag = "div";
+      }
+      if (!DealerOn_Tracker.hasValue(contentID)) {
+        contentID = "customContent";
+      }
+      if (typeof element != "undefined" && element != null) {
+        var newTag = document.createElement(contentTag);
+        newTag.setAttribute("id", contentID);
+        element.appendChild(newTag);
+        newTag.innerHTML = content;
+      }
+    }
+  },
+  addHtmlContentByID: function (content, elementId, position) {
+    var element = document.getElementById(elementId);
+    if (typeof element != "undefined" && element != null) {
+      if (position == 1) {
+        element.innerHTML = content + element.innerHTML;
+      } else {
+        element.innerHTML = element.innerHTML + content;
+      }
+    }
+  },
+  appendHTMLContentByID: function (content, elementId, contentTag, contentID) {
+    var element = document.getElementById(elementId);
+    if (!DealerOn_Tracker.hasValue(contentTag)) {
+      contentTag = "div";
+    }
+    if (!DealerOn_Tracker.hasValue(contentID)) {
+      contentID = "customContent";
+    }
+    if (typeof element != "undefined" && element != null) {
+      var newTag = document.createElement(contentTag);
+      newTag.setAttribute("id", contentID);
+      element.appendChild(newTag);
+      newTag.innerHTML = content;
+    }
+  },
+
+  addHtmlContentByCriteriaByClass: function (
+    content,
+    className,
+    tag,
+    position,
+    criteria,
+    value
+  ) {
+    if (DealerOn_Tracker.ParameterByName(criteria) == value) {
+      if (DealerOn_Tracker.hasValue(DealerOn_Tracker.ParameterByName("rm"))) {
+        if (DealerOn_Tracker.ParameterByName("rm") != criteria) {
+          this.addHtmlContentByClass(content, className, tag, position);
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        this.addHtmlContentByClass(content, className, tag, position);
+        return true;
+      }
+    }
+    return false;
+  },
+  addHtmlContentByCriteriaByID: function (
+    content,
+    elementId,
+    position,
+    criteria,
+    value
+  ) {
+    if (DealerOn_Tracker.ParameterByName(criteria) == value) {
+      if (DealerOn_Tracker.hasValue(DealerOn_Tracker.ParameterByName("rm"))) {
+        if (DealerOn_Tracker.ParameterByName("rm") != criteria) {
+          this.addHtmlContentByID(content, elementId, position);
+          return true;
+        }
+      } else {
+        this.addHtmlContentByID(content, elementId, position);
+        return true;
+      }
+    }
+    return false;
+  },
+  replaceHtmlContentByCriteriaByID: function (
+    content,
+    elementId,
+    criteria,
+    value
+  ) {
+    if (DealerOn_Tracker.ParameterByName(criteria) === value) {
+      var tElement = document.getElementById(elementId);
+      if (content !== "" && tElement !== "") {
+        tElement.innerHTML = content;
+      } else {
+        return;
+      }
+    } else {
+      return;
+    }
+  },
+  replaceHtmlContentByCriteriaByClass: function (
+    content,
+    elementClass,
+    criteria,
+    value
+  ) {
+    if (DealerOn_Tracker.ParameterByName(criteria) === value) {
+      var tElement = document.document.getElementsByClassName(elementClass);
+      if (tElement.length > 1) return;
+      if (content !== "" && tElement !== "") {
+        tElement.innerHTML = content;
+      } else {
+        return;
+      }
+    } else {
+      return;
+    }
+  },
+  moveHtmlContentByID: function (elementId, newId) {
+    var element = document.getElementById(elementId);
+    var newElement = document.getElementById(newId);
+    if (
+      typeof element != "undefined" &&
+      element != null &&
+      typeof newElement != "undefined" &&
+      newElement != null
+    ) {
+      newElement.innerHTML = element.innerHTML;
+      this.removeElementByID(elementId);
+    }
+  },
+  removeElementByClass: function (className, tag) {
+    var results = [];
+    var element;
+    results = this.getElementsByClass(className, tag);
+
+    for (var i = 0; i < results.length; i++) {
+      element = results[i];
+      element.parentNode.removeChild(element);
+    }
+  },
+  getContentByID: function (elementId) {
+    var element = document.getElementById(elementId);
+    if (typeof element != "undefined" && element != null) {
+      return element.innerHTML;
+    }
+    return "";
+  },
+  getContentByClass: function (className, tag) {
+    var results = [];
+    var element;
+    results = this.getElementsByClass(className, tag);
+    if (results.length > 0) {
+      var element = results[0];
+      if (typeof element != "undefined" && element != null) {
+        return element.innerHTML;
+      }
+    }
+    return "";
+  },
+
+  removeElementByID: function (elementId) {
+    return (element = document.getElementById(elementId))
+      ? element.parentNode.removeChild(element)
+      : false;
+  },
+  clearContentByClass: function (className, tag) {
+    var results = [];
+    var element;
+    results = this.getElementsByClass(className, tag);
+    for (var i = 0; i < results.length; i++) {
+      element = results[i];
+      while (element.hasChildNodes()) {
+        element.removeChild(element.lastChild);
+      }
+    }
+  },
+  clearContentById: function (elementId) {
+    var element = document.getElementById(elementId);
+    while (element.hasChildNodes()) {
+      element.removeChild(element.lastChild);
+    }
+  },
+  addHTMLContentToParentByClass: function (
+    content,
+    className,
+    tag,
+    contentID,
+    contentTag
+  ) {
+    var results = [];
+    results = this.getElementsByClass(className, tag);
+    if (!DealerOn_Tracker.hasValue(contentTag)) {
+      contentTag = "div";
+    }
+
+    if (results.length > 0) {
+      // Added to first element found
+      var element = results[0].parentNode;
+      if (typeof element != "undefined" && element != null) {
+        var newTag = document.createElement(contentTag);
+        newTag.setAttribute("id", contentID);
+        element.appendChild(newTag);
+        newTag.innerHTML = content;
+      }
+    }
+  },
+  addHTMLContentToParentByID: function (
+    content,
+    contentID,
+    elementId,
+    contentTag
+  ) {
+    var element = document.getElementById(elementId);
+    element = element.parentNode;
+    if (!DealerOn_Tracker.hasValue(contentTag)) {
+      contentTag = "div";
+    }
+    if (typeof element != "undefined" && element != null) {
+      var newTag = document.createElement(contentTag);
+      newTag.setAttribute("id", contentID);
+      element.appendChild(newTag);
+      newTag.innerHTML = content;
+    }
+  },
+  changeImageByClass: function (path, className) {
+    results = this.getElementsByClass(className, "img");
+    for (var i = 0; i < results.length; i++) {
+      results[i].src = path;
+    }
+  },
+  changeImageByID: function (path, elementId) {
+    var element = document.getElementById(elementId);
+    if (typeof element != "undefined" && element != null) {
+      element.src = path;
+    }
+  },
+  changeImageByPath: function (oldPath, newPath) {
+    var allImages = document.getElementsByTagName("img");
+    var element;
+    for (var i = 0, max = allImages.length; i < max; i++) {
+      if (allImages[i].src === oldPath) {
+        element = allImages[i];
+        if (typeof element != "undefined" && element != null) {
+          element.src = newPath;
+        }
+      }
+    }
+  },
+  changeHrefByClass: function (path, className) {
+    results = this.getElementsByClass(className, "a");
+    for (var i = 0; i < results.length; i++) {
+      results[i].href = path;
+    }
+  },
+  changeHrefByID: function (path, elementId) {
+    var element = document.getElementById(elementId);
+    if (typeof element != "undefined" && element != null) {
+      element.href = path;
+    }
+  },
+  changeHrefByPath: function (oldPath, newPath) {
+    var allAtags = document.getElementsByTagName("a");
+    for (var i = 0; i < allAtags.length; i++) {
+      if (allAtags[i].href === oldPath) {
+        allAtags[i].href = newPath;
+      }
+    }
+  },
+  addSocialIconsByClass: function (
+    className,
+    tag,
+    dealerName,
+    size,
+    FBUrl,
+    YoutubeUrl,
+    TwitterUrl,
+    GooglePlusUrl
+  ) {
+    GooglePlusUrl = typeof GooglePlusUrl === "undefined" ? "" : GooglePlusUrl;
+    var content = "";
+    if (FBUrl.length > 0)
+      content +=
+        '<a target="_blank" href="' +
+        FBUrl +
+        '"><img alt="' +
+        dealerName +
+        ' Facebook" title="' +
+        dealerName +
+        ' Facebook" src="' +
+        AssetsPath +
+        "assets/socialIcons/FaceBook_" +
+        size +
+        "x" +
+        size +
+        '.png"></a>';
+    if (YoutubeUrl.length > 0)
+      content +=
+        '<a target="_blank" href="' +
+        YoutubeUrl +
+        '"><img alt="' +
+        dealerName +
+        ' Youtube" title="' +
+        dealerName +
+        ' Youtube" src="' +
+        AssetsPath +
+        "assets/socialIcons/youtube_" +
+        size +
+        "x" +
+        size +
+        '.png"></a>';
+    if (TwitterUrl.length > 0)
+      content +=
+        '<a target="_blank" href="' +
+        TwitterUrl +
+        '"><img alt="' +
+        dealerName +
+        ' Twitter" title="' +
+        dealerName +
+        ' Twitter" src="' +
+        AssetsPath +
+        "assets/socialIcons/Twitter_" +
+        size +
+        "x" +
+        size +
+        '.png"></a>';
+    if (GooglePlusUrl.length > 0)
+      content +=
+        '<a target="_blank" href="' +
+        GooglePlusUrl +
+        '"><img alt="' +
+        dealerName +
+        ' Google Plus" title="' +
+        dealerName +
+        ' Google Plus" src="' +
+        AssetsPath +
+        "assets/socialIcons/gplus_" +
+        size +
+        "x" +
+        size +
+        '.png"></a>';
+    var results = [];
+    results = this.getElementsByClass(className, tag);
+    if (results.length > 0) {
+      var element = results[0];
+      if (typeof element != "undefined" && element != null) {
+        var newdiv = document.createElement("div");
+        newdiv.setAttribute("class", "social");
+        element.appendChild(newdiv);
+        newdiv.innerHTML = content;
+      }
+    }
+  },
+  addSocialIconsByID: function (
+    elementId,
+    dealerName,
+    size,
+    FBUrl,
+    YoutubeUrl,
+    TwitterUrl,
+    GooglePlusUrl
+  ) {
+    GooglePlusUrl = typeof GooglePlusUrl === "undefined" ? "" : GooglePlusUrl;
+    var content = "";
+    if (FBUrl.length > 0)
+      content +=
+        '<a target="_blank" href="' +
+        FBUrl +
+        '"><img alt="' +
+        dealerName +
+        ' Facebook" title="' +
+        dealerName +
+        ' Facebook" src="' +
+        AssetsPath +
+        "assets/socialIcons/FaceBook_" +
+        size +
+        "x" +
+        size +
+        '.png"></a>';
+    if (YoutubeUrl.length > 0)
+      content +=
+        '<a target="_blank" href="' +
+        YoutubeUrl +
+        '"><img alt="' +
+        dealerName +
+        ' Youtube" title="' +
+        dealerName +
+        ' Youtube" src="' +
+        AssetsPath +
+        "assets/socialIcons/youtube_" +
+        size +
+        "x" +
+        size +
+        '.png"></a>';
+    if (TwitterUrl.length > 0)
+      content +=
+        '<a target="_blank" href="' +
+        TwitterUrl +
+        '"><img alt="' +
+        dealerName +
+        ' Twitter" title="' +
+        dealerName +
+        ' Twitter" src="' +
+        AssetsPath +
+        "assets/socialIcons/Twitter_" +
+        size +
+        "x" +
+        size +
+        '.png"></a>';
+    if (GooglePlusUrl.length > 0)
+      content +=
+        '<a target="_blank" href="' +
+        GooglePlusUrl +
+        '"><img alt="' +
+        dealerName +
+        ' Google Plus" title="' +
+        dealerName +
+        ' Google Plus" src="' +
+        AssetsPath +
+        "assets/socialIcons/gplus_" +
+        size +
+        "x" +
+        size +
+        '.png"></a>';
+    var newdiv = document.createElement("div");
+    newdiv.setAttribute("class", "social");
+    var element = document.getElementById(elementId);
+    element.appendChild(newdiv);
+    newdiv.innerHTML = content;
+  },
+  createMap: function (dealerId, width, height) {
+    var map = "";
+    var map = document.createElement("iframe");
+    map.setAttribute("id", "googleMap");
+    map.setAttribute("frameborder", "0");
+    map.setAttribute("scrolling", "no");
+    map.setAttribute("width", width);
+    map.setAttribute("height", height);
+    var url =
+      "http://maps.dealeron.com/map.aspx?dealerid=" +
+      dealerId +
+      "&mw=" +
+      width +
+      "&mh=" +
+      height +
+      "&mode=c";
+    map.setAttribute("src", url);
+    return map;
+  },
+  addMapByID: function (dealerId, width, height, elementId) {
+    var element = document.getElementById(elementId);
+    var newMap = this.createMap(dealerId, width, height);
+    element.appendChild(newMap);
+    return true;
+  },
+  addMapByClass: function (dealerId, width, height, className, tag) {
+    var results = [];
+    results = this.getElementsByClass(className, tag);
+    if (results.length > 0) {
+      var element = results[0].parentNode;
+      if (typeof element != "undefined" && element != null) {
+        var newMap = this.createMap(dealerId, width, height);
+        element.appendChild(newMap);
+      }
+    }
+    return true;
+  },
+  loadjscssfile: function (filename, filetype, where) {
+    var fileref;
+    if (filetype == "js") {
+      fileref = document.createElement("script");
+      fileref.setAttribute("src", filename);
+    } else if (filetype == "css") {
+      fileref = document.createElement("link");
+      fileref.setAttribute("rel", "stylesheet");
+      fileref.setAttribute("href", filename);
+    }
+    if (typeof fileref != "undefined") {
+      if (where == "head") {
+        document.getElementsByTagName("head")[0].appendChild(fileref);
+      } else {
+        document.getElementsByTagName("body")[0].appendChild(fileref);
+      }
+    }
+  },
+  changeCssByClass: function (property, value, className, tag) {
+    var results = [];
+    var st = property + ":" + value + ";";
+    results = this.getElementsByClass(className, tag);
+    for (var i = 0; i < results.length; i++) {
+      results[i].setAttribute("style", st);
+    }
+  },
+  changeCssByID: function (property, value, elementId) {
+    var element = document.getElementById(elementId);
+    var st = property + ":" + value + ";";
+    if (typeof element != "undefined" && element != null) {
+      element.setAttribute("style", st);
+    }
+  },
+  icon: function (o) {
+    o.id = typeof o.id == "undefined" ? "" : o.id;
+    o.title = typeof o.title == "undefined" ? "" : o.title;
+    o.image = typeof o.image == "undefined" ? "" : o.image;
+    o.href = typeof o.href == "undefined" ? "" : o.href;
+    o.target = typeof o.target == "undefined" ? "blank" : o.target;
+    return o;
+  },
+  addCustomSocialIconsByID: function (elementId, socialIcons) {
+    var content = "";
+    var s;
+    for (var i = 0; i < socialIcons.length; i++) {
+      s = socialIcons[i];
+      content +=
+        '<a id="' +
+        s.id +
+        '" target="_' +
+        s.target +
+        '" href="' +
+        s.href +
+        '"><img alt="' +
+        s.title +
+        '" src="' +
+        s.image +
+        '"></a>';
+    }
+    if (content > "") {
+      var newdiv = document.createElement("div");
+      newdiv.setAttribute("class", "customSocialIcons");
+      var element = document.getElementById(elementId);
+      element.appendChild(newdiv);
+      newdiv.innerHTML = content;
+    }
+  },
+  addCustomSocialIconsByClass: function (className, tag, socialIcons) {
+    var content = "";
+    var s;
+    for (var i = 0; i < socialIcons.length; i++) {
+      s = socialIcons[i];
+      content +=
+        '<a id="' +
+        s.id +
+        '" target="_' +
+        s.target +
+        '" href="' +
+        s.href +
+        '"><img alt="' +
+        s.title +
+        '" src="' +
+        s.image +
+        '"></a>';
+    }
+    if (content > "") {
+      var results = [];
+      results = this.getElementsByClass(className, tag);
+      if (results.length > 0) {
+        var element = results[0];
+        if (typeof element != "undefined" && element != null) {
+          var newdiv = document.createElement("div");
+          newdiv.setAttribute("class", "social");
+          element.appendChild(newdiv);
+          newdiv.innerHTML = content;
+        }
+      }
+    }
+  },
+
+  AddRotatingLogoByClass: function (
+    className,
+    tag,
+    logos,
+    width,
+    height,
+    time
+  ) {
+    var content = "";
+    var l;
+    for (var i = 0; i < logos.length; i++) {
+      l = logos[i];
+      content +=
+        '<img id="' +
+        l.id +
+        '" alt="' +
+        l.title +
+        '" title="' +
+        l.title +
+        '" src="' +
+        l.image +
+        '"';
+      if (l.target == "blank") {
+        content += " onclick=\"window.open('" + l.href + "')\" >";
+      } else {
+        content += " onclick=\"location.href='" + l.href + "'\" >";
+      }
+    }
+    if (content > "") {
+      var css = document.createElement("style");
+      var styles =
+        "#rotatingLogo{position:relative;height:" +
+        height +
+        "px;width:" +
+        width +
+        "px;}";
+      styles +=
+        "#rotatingLogo img{position:absolute;left:0;top:0;border:0;cursor:pointer;}";
+      css.appendChild(document.createTextNode(styles));
+      document.getElementsByTagName("head")[0].appendChild(css);
+
+      var newdiv = document.createElement("div");
+      newdiv.setAttribute("id", "rotatingLogo");
+
+      results = this.getElementsByClass(className, tag);
+      if (results.length > 0) {
+        var element = results[0];
+        this.clearContentByClass(className, tag);
+        element.appendChild(newdiv);
+        newdiv.innerHTML = content;
+        this.rotateBannerImages(time);
+      }
+    }
+  },
+  AddRotatingLogoById: function (elementId, logos, width, height, time) {
+    var content = "";
+    var l;
+    for (var i = 0; i < logos.length; i++) {
+      l = logos[i];
+      content +=
+        '<img id="Img1" alt="' +
+        l.title +
+        '" title="' +
+        l.title +
+        '" src="' +
+        l.image +
+        '"';
+      if (l.target == "blank") {
+        content += " onclick=\"window.open('" + l.href + "')\" >";
+      } else {
+        content += " onclick=\"location.href='" + l.href + "'\" >";
+      }
+    }
+    if (content > "") {
+      var css = document.createElement("style");
+      var styles =
+        "#rotatingLogo{ position:relative;height:" +
+        height +
+        "px;width:" +
+        width +
+        "px;}";
+      styles +=
+        "#rotatingLogo img { position:absolute;left:0;top:0;border:0; cursor:pointer;}";
+      css.appendChild(document.createTextNode(styles));
+      document.getElementsByTagName("head")[0].appendChild(css);
+
+      var newdiv = document.createElement("div");
+      newdiv.setAttribute("id", "rotatingLogo");
+      var element = document.getElementById(elementId);
+      if (typeof element != "undefined" && element != null) {
+        this.clearContentById(elementId);
+        element.appendChild(newdiv);
+        newdiv.innerHTML = content;
+        this.rotateBannerImages(time);
+      }
+    }
+  },
+  rotateBannerImages: function (time) {
+    var img = document
+      .getElementById("rotatingLogo")
+      .getElementsByTagName("img");
+    var node = document
+      .getElementById("rotatingLogo")
+      .firstChild.cloneNode(true);
+    img[0].parentNode.removeChild(img[0]);
+    document.getElementById("rotatingLogo").appendChild(node);
+    window.setTimeout(function () {
+      DealerOn_ContentManagement.rotateBannerImages(time);
+    }, time);
+  },
+};
+
+$(document).ready(function () {
+  var DealerOn_FormGeneration = {
+    hasForm: false,
+    setupLibrary: function () {
+      var scripts = $("script[src]");
+      for (var i = 0; i < scripts.length; i++) {
+        if (scripts[i].src.indexOf("form.js") > 0) {
+          DealerOn_FormGeneration.hasForm = true;
+          break;
+        }
+      }
+      DealerOn_FormGeneration.jQueryPlugins();
+    },
+    jQueryPlugins: function () {
+      if (window.$) {
+        if (!DealerOn_FormGeneration.hasForm) {
+          DealerOn_ContentManagement.loadjscssfile(
+            JsPath +
+              "resources/external/jQuery/jquery.dealerOn.formSubmission.min.js?v=" +
+              window.cacheBuster3000,
+            "js",
+            "body"
+          );
+        }
+      } else {
+        window.setTimeout(DealerOn_FormGeneration.jQueryPlugins, 50);
+      }
+    },
+    activateFormPlugin: function (theform) {
+      jQuery("#" + theform).dealerOnFormSubmission();
+    },
+    finalizeForm: function () {
+      if (typeof dealerOnFormSub != "undefined") {
+        window.setTimeout(DealerOn_FormGeneration.activateForm, 150);
+      } else {
+        window.setTimeout(DealerOn_FormGeneration.finalizeForm, 50);
+      }
+    },
+    activateForm: function () {
+      for (var i = 0; i < DealerOnCustomForms.length; i++) {
+        var elm = DealerOnCustomForms[i].id;
+        DealerOn_FormGeneration.activateFormPlugin(elm);
+      }
+    },
+  };
+
+  var DealerOnCustomForms = DealerOn_ContentManagement.getElementsByClass(
+    "dealerOnform",
+    "div"
+  );
+  if (DealerOnCustomForms.length > 0) {
+    DealerOn_FormGeneration.setupLibrary();
+    DealerOn_FormGeneration.finalizeForm();
+  }
+
+  var currentPage = window.location.href.split("#")[0];
+  var anchorTags = Array.from(
+    document.querySelectorAll(
+      '#nav-sidebar li:not(.dropdown-has-children) a[href*="#"]'
+    )
+  );
+  var navLinks = anchorTags.map((anchorElement) =>
+    anchorElement.getAttribute("href")
+  );
+
+  for (var i = 0; i < navLinks.length; i++) {
+    var navLinkNoAnchor = navLinks[i].split("#")[0];
+    if (currentPage === navLinkNoAnchor) {
+      var anchorHash = navLinks[i].split("#")[1];
+      $("a[href*='#" + anchorHash + "']").click(function (event) {
+        event.preventDefault;
+
+        $("body").removeClass("sidebar-is-open");
+        $("#navbar-backdrop").removeClass("in");
+        setTimeout(function () {
+          $("#navbar-backdrop").addClass("invisible").remove();
+        }, 250);
+      });
+    }
+  }
+});
+
+var DealerOn_CouponManagment = {
+  coupon: function (o) {
+    o.id = typeof o.id == "undefined" ? "couponDealerOn" : o.id;
+    o.title = typeof o.title == "undefined" ? "" : o.title;
+    o.image = typeof o.image == "undefined" ? "" : o.image;
+    o.content = typeof o.html == "undefined" ? "" : o.html;
+    o.contentTag = typeof o.contentTag == "undefined" ? "div" : o.contentTag;
+    o.contentId =
+      typeof o.contentId == "undefined" ? "couponContent" : o.contentId;
+    o.width = typeof o.width == "undefined" ? "0" : o.width;
+    o.height = typeof o.height == "undefined" ? "0" : o.height;
+    o.top = typeof o.top == "undefined" ? "0" : o.top;
+    o.right = typeof o.right == "undefined" ? "0" : o.right;
+    o.bottom = typeof o.bottom == "undefined" ? "0" : o.bottom;
+    o.left = typeof o.left == "undefined" ? "0" : o.left;
+    o.close = typeof o.left == "undefined" ? 1 : o.left;
+    o.overlay = typeof o.overlay == "undefined" ? 0 : o.overlay;
+    o.overlayId =
+      typeof o.overlayId == "undefined" ? "dealeronOverlay" : o.overlayId;
+    o.overlayColor =
+      typeof o.overlayColor == "undefined" ? "#000000" : o.overlayColor;
+    o.overlayClose = typeof o.overlayClose == "undefined" ? 0 : o.overlayClose;
+    o.overlayHref = typeof o.overlayHref == "undefined" ? "" : o.overlayHref;
+    o.overlayTarget =
+      typeof o.overlayTarget == "undefined" ? "" : o.overlayTarget;
+    o.overlayPopUpWidth =
+      typeof o.overlayPopUpWidth == "undefined" ? "600" : o.overlayPopUpWidth;
+    o.overlayPopUpHeight =
+      typeof o.overlayPopUpHeight == "undefined" ? "400" : o.overlayPopUpHeight;
+    o.href = typeof o.href == "undefined" ? "" : o.href;
+    o.target = typeof o.target == "undefined" ? "" : o.target;
+    o.popUpWidth = typeof o.popUpWidth == "undefined" ? "600" : o.popUpWidth;
+    o.popUpHeight = typeof o.popUpHeight == "undefined" ? "400" : o.popUpHeight;
+    o.button = typeof o.button == "undefined" ? "[]" : o.button;
+    o.session = typeof o.session == "undefined" ? 0 : o.session;
+    o.cookieName =
+      typeof o.cookieName == "undefined" ? "dealeronPopUp" : o.cookieName;
+    o.pageName = typeof o.pageName == "undefined" ? "[]" : o.pageName;
+    o.pageCriteria =
+      typeof o.pageCriteria == "undefined" ? "[]" : o.pageCriteria;
+    o.showOnMobile =
+      typeof o.showOnMobile == "undefined" ? false : o.showOnMobile;
+    return o;
+  },
+  pageHeight: function () {
+    var D = document;
+    return Math.max(
+      Math.max(D.body.scrollHeight, D.documentElement.scrollHeight),
+      Math.max(D.body.offsetHeight, D.documentElement.offsetHeight),
+      Math.max(D.body.clientHeight, D.documentElement.clientHeight)
+    );
+  },
+  createBackgroundOverlay: function (id, color) {
+    var overlayDiv = document.createElement("div");
+    overlayDiv.setAttribute("id", id);
+    overlayDiv.style.display = "block";
+    overlayDiv.style.position = "absolute";
+    overlayDiv.style.top = "0";
+    overlayDiv.style.left = "0";
+    overlayDiv.style.width = "100%";
+    overlayDiv.style.height = this.pageHeight() + "px";
+    overlayDiv.style.backgroundColor = color;
+    overlayDiv.style.zIndex = "9998";
+    overlayDiv.style.opacity = "0.8";
+    overlayDiv.style.filter = "alpha(opacity=80)";
+    document.body.appendChild(overlayDiv);
+  },
+  couponButton: function (button, pId1, pId2) {
+    if (typeof button == "undefined") return false;
+    var buttonDiv = document.createElement("div");
+    if ((button.id = "couponDealerOn"))
+      buttonDiv.setAttribute("id", "couponDealerOnBtn");
+    else buttonDiv.setAttribute("id", button.id);
+    buttonDiv.setAttribute("alt", button.title);
+    buttonDiv.setAttribute("title", button.title);
+
+    if (button.image > "")
+      buttonDiv.style.backgroundImage = 'url("' + button.image + '")';
+
+    buttonDiv.style.width = button.width + "px";
+    buttonDiv.style.height = button.height + "px";
+    buttonDiv.style.cursor = "pointer";
+    buttonDiv.style.position = "absolute";
+    buttonDiv.style.dislay = "block";
+    if (button.top > 0) buttonDiv.style.top = button.top + "px";
+    if (button.right > 0) buttonDiv.style.right = button.right + "px";
+    if (button.bottom > 0) buttonDiv.style.bottom = button.bottom + "px";
+    if (button.left > 0) buttonDiv.style.left = button.left + "px";
+    buttonDiv.style.zIndex = "2";
+
+    buttonDiv.onclick = function () {
+      if (typeof pId2 != "undefined")
+        DealerOn_ContentManagement.removeElementByID(pId2);
+      if (typeof pId1 != "undefined")
+        DealerOn_ContentManagement.removeElementByID(pId1);
+
+      if (button.href > "") {
+        if (button.target == "blank") {
+          var btnPopUp_opt =
+            "toolbar=yes, location=yes, directories=no, status=no, menubar=yes, scrollbars=yes, resizable=no, copyhistory=yes, width=" +
+            button.popUpWidth +
+            ", height=" +
+            button.popUpHeight;
+          window.open(button.href, "_blank", btnPopUp_opt);
+        } else {
+          window.location = button.href;
+        }
+      }
+    };
+    if (typeof pId1 != "undefined")
+      document.getElementById(pId1).appendChild(buttonDiv);
+  },
+  popUpCookie: function (cookieName) {
+    var value = DealerOn_Tracker.readCookie(cookieName);
+    if (value == null || value == 0) {
+      DealerOn_Coupon.createCookie(cookieName, "1");
+      return false;
+    } else {
+      return true;
+    }
+  },
+  pageCheck: function (name) {
+    var path = window.location.pathname;
+    var filename = path.match(/.*\/([^/]+)\.([^?]+)/i)[1];
+    if (filename == name) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  criteriaCheck: function (value) {
+    var result = false;
+    var c = eval(value);
+    var name = c.n.toLowerCase();
+    var value = c.v.toLowerCase();
+
+    if (DealerOn_Tracker.ParameterByName(name).toLowerCase() == value) {
+      if (DealerOn_Tracker.hasValue(DealerOn_Tracker.ParameterByName("rm"))) {
+        if (DealerOn_Tracker.ParameterByName("rm") != name) {
+          result = true;
+        }
+      } else result = true;
+    }
+    return result;
+  },
+  isMobile: function () {
+    return (mobileResponsive = window.innerWidth < 768);
+  },
+  createCoupon: function (coupon) {
+    var pageEvaluator = eval(coupon.pageName);
+    var activate = true;
+    if (pageEvaluator.length > 0) {
+      activate = false;
+    }
+    for (var i = 0; i < pageEvaluator.length; i++) {
+      if (!activate) {
+        activate = this.pageCheck(pageEvaluator[i]);
+      }
+    }
+    if (!activate) return false;
+
+    pageEvaluator = eval(coupon.pageCriteria);
+    activate = true;
+    if (pageEvaluator.length > 0) {
+      activate = false;
+    }
+    for (var i = 0; i < pageEvaluator.length; i++) {
+      if (!activate) {
+        activate = this.criteriaCheck(pageEvaluator[i]);
+      }
+    }
+    if (!activate) {
+      return false;
+    }
+
+    pageEvaluator = eval(coupon.showOnMobile);
+    if (this.isMobile() && !pageEvaluator) {
+      return false;
+    }
+
+    if (coupon.session) {
+      if (this.popUpCookie(coupon.cookieName)) return false;
+    }
+
+    var couponDiv = document.createElement("div");
+    couponDiv.setAttribute("id", coupon.id);
+    couponDiv.style.dislay = "none";
+    couponDiv.style.position = "absolute";
+    if (coupon.top > 0) couponDiv.style.top = coupon.top + "px";
+    else {
+      if (parseInt(this.pageHeight()) > 800) {
+        couponDiv.style.top = "10%";
+      } else {
+        couponDiv.style.top = "25%";
+      }
+    }
+    if (coupon.left > 0) couponDiv.style.left = coupon.left + "px";
+    else couponDiv.style.left = "25%";
+
+    couponDiv.style.zIndex = "99999";
+    couponDiv.style.backgroundColor = "#fff";
+    if (coupon.image > "")
+      couponDiv.style.backgroundImage = 'url("' + coupon.image + '")';
+    couponDiv.style.width = coupon.width + "px";
+    couponDiv.style.height = coupon.height + "px";
+    if (coupon.close) {
+      var closeDiv = document.createElement("div");
+      closeDiv.setAttribute("id", "closeForm");
+      closeDiv.setAttribute("alt", "Close");
+      closeDiv.setAttribute("title", "Close");
+      closeDiv.style.backgroundImage =
+        "url(" + AssetsPath + "resources/components/utilityImages/close.png)";
+      closeDiv.style.width = "27px";
+      closeDiv.style.height = "31px";
+      closeDiv.style.cursor = "pointer";
+      closeDiv.style.position = "absolute";
+      closeDiv.style.dislay = "block";
+      closeDiv.style.top = "-7px";
+      closeDiv.style.right = "-5px";
+      closeDiv.style.zIndex = "100";
+      couponDiv.appendChild(closeDiv);
+      closeDiv.onclick = function () {
+        DealerOn_ContentManagement.removeElementByID(coupon.id);
+        if (coupon.overlay) {
+          DealerOn_ContentManagement.removeElementByID(coupon.overlayId);
+        }
+        if (coupon.href > "") {
+          if (coupon.target == "blank") {
+            var couponPopUp_opt =
+              "toolbar=yes, location=yes, directories=no, status=no, menubar=yes, scrollbars=yes, resizable=no, copyhistory=yes, width=" +
+              coupon.popUpWidth +
+              ", height=" +
+              coupon.popUpHeight;
+            window.open(coupon.href, "_blank", couponPopUp_opt);
+          } else {
+            window.location = coupon.href;
+          }
+        }
+      };
+    }
+
+    if (coupon.content > "") {
+      var contentDiv = document.createElement(coupon.contentTag);
+      contentDiv.setAttribute("id", coupon.contentId);
+      contentDiv.innerHTML = coupon.content;
+      couponDiv.appendChild(contentDiv);
+    }
+
+    if (coupon.overlay) {
+      this.createBackgroundOverlay(coupon.overlayId, coupon.overlayColor);
+      if (coupon.overlayClose) {
+        document.getElementById(coupon.overlayId).onclick = function () {
+          DealerOn_ContentManagement.removeElementByID(coupon.id);
+          DealerOn_ContentManagement.removeElementByID(coupon.overlayId);
+          if (coupon.overlayHref > "") {
+            if (coupon.overlayTarget == "blank") {
+              var overlayPopUp_opt =
+                "toolbar=yes, location=yes, directories=no, status=no, menubar=yes, scrollbars=yes, resizable=no, copyhistory=yes, width=" +
+                coupon.overlayPopUpWidth +
+                ", height=" +
+                coupon.overlayPopUpHeight;
+              window.open(coupon.overlayHref, "_blank", overlayPopUp_opt);
+            } else {
+              window.location = coupon.overlayHref;
+            }
+          }
+        };
+      }
+    }
+    document.body.appendChild(couponDiv);
+    var b = eval(coupon.button);
+    for (var i = 0; i < b.length; i++) {
+      this.couponButton(b[i], coupon.id, coupon.overlayId);
+    }
+  },
+};
+
+var DealerOn_Referrer_Data = {
+  cookieDays: 30,
+  cookieName: "DLRON_REFERRER_DATA",
+  queryStringToJSON: function (querystring) {
+    var pairs = querystring.slice(0).split("&");
+    var result = {};
+    pairs.forEach(function (pair) {
+      pair = pair.split("=");
+      result[pair[0]] = decodeURIComponent(pair[1] || "");
+    });
+
+    return JSON.stringify(result);
+  },
+  setCookie: function (queryString) {
+    if (queryString) {
+      var date = new Date();
+      date.setTime(date.getTime() + this.cookieDays * 24 * 60 * 60 * 1000);
+      var expires = "; expires=" + date.toGMTString();
+      var data = this.queryStringToJSON(queryString);
+      document.cookie =
+        escape(this.cookieName) + "=" + data + expires + "; path=/";
+    }
+  },
+  getCookieData: function () {
+    var nameEQ = this.cookieName + "=";
+    var ca = document.cookie.split(";");
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i];
+      while (c.charAt(0) == " ") c = c.substring(1, c.length);
+      if (c.indexOf(nameEQ) == 0) {
+        var result = c.substring(nameEQ.length, c.length);
+        return JSON.parse(result);
+      }
+    }
+    return null;
+  },
+  hasData: function () {
+    return this.getCookieData() != null;
+  },
+  deleteCookie: function () {
+    document.cookie =
+      escape(this.cookieName) +
+      "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+  },
+};
+
+var DealerOn_Campaign_Tracker = {
+  campaign_Tracker_Name: DlronGlobal_DealeronCampaignTrackerCookieName,
+  url_Tracker_Name: DlronGlobal_DealeronUrlTrackerCookieName,
+  createCookie: function (name, value, days) {
+    if (days > 0) {
+      var date = new Date();
+      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+      var expires = "; expires=" + date.toGMTString();
+    } else {
+      var expires = "";
+    }
+    document.cookie = escape(name) + "=" + escape(value) + expires + "; path=/";
+  },
+  setCampaignCookie: function () {
+    var source = DealerOn_Campaign_Tracker.CampaignParameter("utm_source");
+    var medium = DealerOn_Campaign_Tracker.CampaignParameter("utm_medium");
+    var content = DealerOn_Campaign_Tracker.CampaignParameter("utm_content");
+    var term = DealerOn_Campaign_Tracker.CampaignParameter("utm_term");
+    var campaign = DealerOn_Campaign_Tracker.CampaignParameter("utm_campaign");
+    var dlronCampaign = DealerOn_Campaign_Tracker.CampaignParameter("do_cmpgn");
+
+    var cookie_info =
+      "utmcsr=" +
+      source +
+      "|" +
+      "utmccn=" +
+      campaign +
+      "|" +
+      "utmcmd=" +
+      medium +
+      "|" +
+      "utmctr=" +
+      term +
+      "|" +
+      "utmcct=" +
+      content +
+      "|" +
+      "docmpgn=" +
+      dlronCampaign;
+    if (DlronGlobal_CampaignCookieDays) {
+      DealerOn_Campaign_Tracker.createCookie(
+        DealerOn_Campaign_Tracker.campaign_Tracker_Name,
+        cookie_info,
+        DlronGlobal_CampaignCookieDays
+      );
+    } else {
+      DealerOn_Campaign_Tracker.createCookie(
+        DealerOn_Campaign_Tracker.campaign_Tracker_Name,
+        cookie_info,
+        30
+      );
+    }
+  },
+  getCampaignQueryParams: function () {
+    var cookie = DealerOn_Campaign_Tracker.getCookie("DLRON_CAMPAIGN");
+    var decoded = decodeURIComponent(cookie);
+    var params = decoded.split("|");
+    var campaignParams = {};
+    params.forEach((param) => {
+      var keyVal = param.split("=");
+      if (keyVal.length == 2) {
+        var key = keyVal[0];
+        var val = keyVal[1];
+        if (key == "utmcsr" && val) {
+          campaignParams["utm_source"] = val;
+        } else if (key == "utmccn" && val) {
+          campaignParams["utm_campaign"] = val;
+        } else if (key == "utmcmd" && val) {
+          campaignParams["utm_medium"] = val;
+        } else if (key == "utmctr" && val) {
+          campaignParams["utm_term"] = val;
+        } else if (key == "utmcct" && val) {
+          campaignParams["utm_content"] = val;
+        } else if (key == "docmpgn" && val) {
+          campaignParams[key] = val;
+        }
+      }
+    });
+    return campaignParams;
+  },
+  setUrlTrackerCookie: function () {
+    var entryUrl = "entryUrl=" + window.location.href;
+    var urlReferrer = "referrer=" + document.referrer;
+    var campaignParams = this.getCampaignQueryParams();
+    if (!entryUrl.includes("utm_") && campaignParams) {
+      var params = Object.keys(campaignParams)
+        .map(
+          (k) =>
+            encodeURIComponent(k) + "=" + encodeURIComponent(campaignParams[k])
+        )
+        .join("&");
+      entryUrl = entryUrl + "?" + params;
+    }
+
+    if (window.location.href) {
+      var data = this.getUrlQueryStringParams(window.location.href);
+      DealerOn_Referrer_Data.setCookie(data);
+    }
+
+    if (!DlronGlobal_UrlTrackCookieDays) {
+      DlronGlobal_UrlTrackCookieDays = 30;
+    }
+    var date = new Date();
+    date.setTime(
+      date.getTime() + DlronGlobal_UrlTrackCookieDays * 24 * 60 * 60 * 1000
+    );
+    DealeronCookie.setItem(
+      DealerOn_Campaign_Tracker.url_Tracker_Name,
+      entryUrl + "|" + urlReferrer,
+      date.toGMTString(),
+      "/"
+    );
+  },
+  hasValue: function (str) {
+    return (
+      !DealerOn_Campaign_Tracker.isBlank(str) &&
+      !DealerOn_Campaign_Tracker.isEmpty(str)
+    );
+  },
+  isBlank: function (str) {
+    return !str || /^\s*$/.test(str);
+  },
+  isEmpty: function (str) {
+    return !str || 0 === str.length;
+  },
+  eraseCookie: function (name) {
+    DealerOn_Campaign_Tracker.createCookie(name, "", -1);
+  },
+  getCookie: function (cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(";");
+    for (var i = 0; i < ca.length; i++) {
+      var c = ca[i].trim();
+      if (c.indexOf(name) == 0) return c.substring(name.length, c.length);
+    }
+    return "";
+  },
+  getValueFromKey: function (cookieName, key) {
+    var cValue = DealerOn_Campaign_Tracker.getCookie(cookieName);
+    if (cValue != null && cValue != "") {
+      cValue = cValue.split("%7C");
+
+      if (cValue != null && cValue.length > 0) {
+        for (var c = 0; c < cValue.length; c++) {
+          var cn = cValue[c].split("%3D");
+          if (cn != null && cn.length > 0) {
+            if (key == cn[0]) {
+              return cn[1];
+            }
+          }
+        }
+      }
+    }
+    return "";
+  },
+  deleteCookie: function () {
+    var name = DealerOn_Campaign_Tracker.campaign_Tracker_Name;
+    var path = "/";
+    domain = "";
+    if (DealerOn_Campaign_Tracker.getCookie(name)) {
+      document.cookie =
+        name +
+        "=" +
+        (path ? ";path=" + path : "") +
+        (domain ? ";domain=" + domain : "") +
+        ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
+    }
+  },
+  CampaignParameter: function (name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regexS = "[\\?&]" + name.toLowerCase() + "=([^&#]*)";
+    var regex = new RegExp(regexS);
+    var results = regex.exec(window.location.search.toLowerCase());
+    if (results == null) return "";
+    else return decodeURIComponent(results[1].replace(/\+/g, " "));
+  },
+  campaignCookie: function () {
+    if (
+      DealerOn_Campaign_Tracker.hasValue(
+        DealerOn_Campaign_Tracker.CampaignParameter("utm_campaign")
+      ) ||
+      DealerOn_Campaign_Tracker.hasValue(
+        DealerOn_Campaign_Tracker.CampaignParameter("do_cmpgn")
+      )
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  fiveStarCampaignCookie: function (urlQS) {
+    var expectedUrlQSParams = DlronGlobal_ExpectedQueryStringParams;
+    var items = urlQS.split("&");
+
+    for (var index = 0; index < items.length; index++) {
+      tmp = items[index].split("=");
+      if (tmp != null) {
+        if (expectedUrlQSParams.indexOf(tmp[0]) == -1) {
+          return true;
+        }
+      }
+    }
+    return false;
+  },
+  parseUrlTrackerCookie: function () {
+    var urlReferrer = encodeURI(document.referrer);
+    var hosturl = location.protocol + "//" + location.host;
+
+    if (DlronGlobal_FiveStarCampaingnTracking == 1) {
+      this.enableFivestarCampaignTracking(urlReferrer, hosturl);
+    } else if (
+      urlReferrer != "undefined" &&
+      urlReferrer.indexOf(hosturl) != 0
+    ) {
+      DealerOn_Campaign_Tracker.setUrlTrackerCookie();
+    }
+  },
+  enableFivestarCampaignTracking: function (urlReferrer, hosturl) {
+    if (
+      urlReferrer == "" ||
+      (urlReferrer != "undefined" && urlReferrer.indexOf(hosturl) != 0)
+    ) {
+      var name = DealerOn_Campaign_Tracker.url_Tracker_Name;
+      var urlQS = this.getUrlQueryStringParams(window.location.href);
+
+      if (
+        urlQS.length > 0 &&
+        DealerOn_Campaign_Tracker.fiveStarCampaignCookie(urlQS)
+      ) {
+        DealerOn_Campaign_Tracker.setUrlTrackerCookie();
+      } else {
+        var oldEntryUrl = this.getValueFromKey(name, "entryUrl");
+        var oldEntryUrlQS = this.getUrlQueryStringParams(oldEntryUrl);
+
+        if (
+          oldEntryUrlQS == "" ||
+          !DealerOn_Campaign_Tracker.fiveStarCampaignCookie(oldEntryUrlQS)
+        ) {
+          DealerOn_Campaign_Tracker.setUrlTrackerCookie();
+        }
+      }
+    }
+  },
+  getUrlQueryStringParams: function (fullUrl) {
+    var url = new URL(fullUrl);
+    var queryString = url.search.substring(1); //removes question mark from querystring result
+    return queryString;
+  },
+  getValueFromKey: function (cookieName, key) {
+    var cValue = DealeronCookie.getItem(cookieName);
+
+    if (cValue != null && cValue != "") {
+      cValue = cValue.split("|");
+      if (cValue != null && cValue.length > 0) {
+        for (var c = 0; c < cValue.length; c++) {
+          key = key + "=";
+          if (cValue[c].indexOf(key) == 0) {
+            return cValue[c].substring(key.length, cValue[c].length);
+          }
+        }
+      }
+    }
+    return "";
+  },
+};
+
+if (DealerOn_Campaign_Tracker.campaignCookie()) {
+  DealerOn_Campaign_Tracker.setCampaignCookie();
+}
+var name = DealerOn_Campaign_Tracker.url_Tracker_Name;
+if (DealeronCookie.hasItem(name)) {
+  DealerOn_Campaign_Tracker.parseUrlTrackerCookie();
+} else {
+  DealerOn_Campaign_Tracker.setUrlTrackerCookie();
+}
+
+// BEGIN GCLID Code
+var DealerOn_GCLID = {
+  setGCLIDCookie: function () {
+    var id = DealerOn_GCLID.getParam("gclid"); // get param from URL
+    var daysToKeep = 90 * 24 * 60 * 60; // 90 days converted to seconds
+    DealeronCookie.setItem(DlronGlobal_GCLID, id, daysToKeep);
+  },
+  getParam: function (p) {
+    var match = RegExp("[?&]" + p + "=([^&]*)").exec(window.location.search);
+    return match && decodeURIComponent(match[1].replace(/\+/g, " "));
+  },
+};
+
+if (
+  !DealeronCookie.hasItem(DlronGlobal_GCLID) ||
+  DealeronCookie.getItem(DlronGlobal_GCLID) == "null"
+) {
+  DealerOn_GCLID.setGCLIDCookie();
+}
+
+var DealerOn_Coupon = {
+  couponName: "dealerOn_coupon_" + DlronGlobal_DealerId,
+  createCookie: function (name, value) {
+    document.cookie = name + "=" + value + "; path=/";
+  },
+  setCouponCookie: function () {
+    this.createCookie(this.couponName, "1");
+  },
+  couponCookie: function () {
+    var value = DealerOn_Tracker.readCookie(this.couponName);
+    if (value == null || value == 0) {
+      this.setCouponCookie();
+      return false;
+    } else {
+      return true;
+    }
+  },
+  couponParameter: function () {
+    if (
+      DealerOn_Tracker.hasValue(DealerOn_Tracker.ParameterByName("do_coupon"))
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  },
+  activateCoupon: function () {
+    if (!this.couponCookie()) {
+      if (DlronGlobal_ChromeCoupon) {
+        var is_chrome = /chrome/.test(navigator.userAgent.toLowerCase());
+        if (is_chrome == false) {
+          var couponPath = location.pathname;
+          if (couponPath == "/") {
+            return true;
+          } else {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      } else {
+        var couponPath = location.pathname;
+        if (couponPath == "/") {
+          return true;
+        } else if (this.couponParameter()) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } else {
+      return false;
+    }
+  },
+};
+
+var couponLauncher = false;
+if (
+  DlronGlobal_JsCouponShow &&
+  DealerOn_Coupon.activateCoupon() &&
+  (DlronGlobal_TemplateVersion != 4 || !jQuery.browser.mobile)
+) {
+  couponLauncher = true;
+  CouponContentScript();
+}

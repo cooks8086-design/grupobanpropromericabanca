@@ -1,0 +1,28 @@
+"use strict";
+var LazyLoadHomepage = (function () {
+    function LazyLoadHomepage() {
+        this.querySelector = '[class^=contentSection]';
+        this.observeHomepageSections();
+    }
+    LazyLoadHomepage.prototype.observeHomepageSections = function () {
+        var lazyBackgrounds = Array.from(document.querySelectorAll(this.querySelector));
+        if ('IntersectionObserver' in window) {
+            var lazyBackgroundObserver_1 = new IntersectionObserver(function (entries, observer) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('lazyLoadedBackground');
+                        lazyBackgroundObserver_1.unobserve(entry.target);
+                    }
+                });
+            });
+            lazyBackgrounds.forEach(function (lazyBackground) {
+                lazyBackgroundObserver_1.observe(lazyBackground);
+            });
+        }
+        else {
+            lazyBackgrounds.forEach(function (l) { return l.classList.add('lazyLoadedBackground'); });
+        }
+    };
+    return LazyLoadHomepage;
+}());
+DoUtility.SelfInstantiateOnLoad(LazyLoadHomepage);

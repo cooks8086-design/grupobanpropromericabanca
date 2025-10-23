@@ -1,0 +1,386 @@
+@import "/assets/fonts/opensans/fonts.css";
+/*------------------------------------*
+
+    TABLE OF CONTENT - $ search prefix
+
+    FONT_FAMILY
+    FONT_COLOR
+    FONT_SIZE
+    BACKGROUND COLORS
+    LAYOUT
+    ANCHOR
+    LIST GROUP
+    PANEL
+    WELL
+    TABLE
+    TABS
+    NAV RESET
+    NAVTABS
+    NAV-INVERSE
+    PAGINATION
+    BTN
+    BTN_CTA
+    BTN_MAIN
+    BTN_ALT1
+    BTN_ALT2
+    BTN_ALT3
+    BTN_NAV1 AND BTN_NAV2
+    HOME_MISC
+    HOME_QUICK-NAV
+    HOME_INVENTORY SEARCH BUTTONS
+    WIDGET_INVENTORY SEARCH
+    WIDGET_BANNER
+    WIDGET_MODELBAR
+    FIXED_HEADER
+    MOBILE LEAD DRIVER
+
+    cta             cc0000
+    cta hover       00629a
+    main            000000
+    main hover      cc0000
+
+/*------------------------------------*
+    $FONT_FAMILY
+\*------------------------------------*/
+body { font-family: 'Open Sans'; }
+.heading-xl, .heading-lg, h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 { font-family: 'Open Sans Bold'; text-transform: uppercase;}
+#inventorySearchWidget .isTitle, .srpRefineSearch .panel-title, .srpVehicle h2, .srpVehicle h1.vehicleTitle, #vehiclePageViews h2, .featuredVehicle .title h3 { font-family: 'Open Sans Semibold'; font-weight: normal; text-transform: uppercase;}
+.btn { font-family: 'Open Sans Bold'; font-weight: normal; text-transform: uppercase;}
+label, b, strong, .heading-bold { font-family: 'Open Sans Bold'; font-weight: 600; }
+
+/*------------------------------------*
+    $FONT_COLOR
+\*------------------------------------*/
+body { color: #3b3b3b; }
+hr { border-top-color: #ddd; }
+.text-default { color: #333; }
+.text-main { color: #000; }
+.text-cta { color: #017fff; }
+.text-muted { color: #999; }
+
+/*------------------------------------*
+    $FONT_SIZE
+\*------------------------------------*/
+
+@media (max-width:991px) {
+body, .btn, .dropdown-menu, .form-control { font-size: 13px; }
+}
+/*------------------------------------*
+    $BACKGROUND COLORS
+\*------------------------------------*/
+
+.bg-main {
+    background-color: #000;
+    border: 1px solid transparent;
+    color:#fff;
+}
+.bg-cta {
+    background-color: #017fff;
+    border: 1px solid transparent;
+    color:#000;
+}
+.bg-alt1 {
+    background-color: #F2F2F2;
+    border: 1px solid transparent;
+}
+.bg-alt2 {
+    background-color: #CECECE;
+    border: 1px solid transparent;
+}
+.bg-alt3 {
+    background-color: #6C6C6D;
+    border: 1px solid transparent;
+}
+.offerBlock {
+    background-color: #000;
+    color: #fff;
+}
+
+@media (max-width:767px) {
+.snap-content { background-color: #fff !important; }
+}
+/*------------------------------------*
+    $LAYOUT
+\*------------------------------------*/
+.contentWrapper { padding-bottom: 2em; }
+.contentSectionO, .contentSectionE { padding: 65px 0; }
+
+@media (min-width: 992px) {
+.bannerWrapper { padding: 35px 0; }
+.bannerWrapper.bannerLayout02 { padding: 0; }
+}
+@media (max-width:991px) {
+.contentSectionO, .contentSectionE { padding: 45px 0; }
+}
+@media (max-width:767px) {
+.contentSectionO, .contentSectionE { padding: 35px 0; }
+}
+
+/*------------------------------------*
+    $ANCHOR
+\*------------------------------------*/
+a { color: #017fff; }
+a:hover, a:active, a:focus { color: #2491ff; }
+
+/*------------------------------------*
+    $LIST GROUP
+\*------------------------------------*/
+
+/*------------------------------------*
+    $PANEL
+\*------------------------------------*/
+.panel, .panel-heading, .panel-footer { border-radius: 0; }
+.panel { box-shadow: none; }
+.panel-title { font-weight: bold; }
+/*------------------------------------*
+    $WELL
+\*------------------------------------*/
+.well {
+    box-shadow: none;
+    border-radius: 0;
+}
+/*------------------------------------*
+    $TABLE
+\*------------------------------------*/
+
+/*------------------------------------*
+    $TABS
+\*------------------------------------*/
+.nav-tabs.nav-justified > li > a, .nav-tabs > li > a { background-color: #eee; }
+.nav-tabs.nav-justified > .active > a { border-bottom-color: transparent; }
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus { background-color: #fff; }
+/* tabs inside well */
+.well .nav-tabs.nav-justified > .active > a { background-color: #f5f5f5; }
+.well .panel .nav-tabs.nav-justified > .active > a { background-color: #fff; }
+/*------------------------------------*
+    $NAVTABS
+\*------------------------------------*/
+.nav-pills li.active a, .nav-pills li.active a:hover, .nav-pills li.active a:focus {
+    background-color: #4d4d4d;
+    border-color: transparent;
+    color: #fff;
+}
+/*------------------------------------*
+    $NAV-INVERSE
+\*------------------------------------*/
+
+/*------------------------------------*
+    $PAGINATION
+\*------------------------------------*/
+.pagination .active a, .pagination .active span, .pagination .active a:hover, .pagination .active span:hover, .pagination .active a:focus, .pagination .active span:focus {
+    background-color: #cccccc;
+    border-color: transparent;
+    color: #fff;
+}
+.pagination > li > a, .pagination > li > span { color: #4d4d4d; }
+.pagination > li > a:focus, .pagination > li > a:hover, .pagination > li > span:focus, .pagination > li > span:hover { color: #222; }
+/*------------------------------------*
+    $BTN
+\*------------------------------------*/
+.btn {
+    border-radius: 25px;
+    -webkit-transition: all .3s ease-in-out;
+    -moz-transition: all .3s ease-in-out;
+    -o-transition: all .3s ease-in-out;
+    -ms-transition: all .3s ease-in-out;
+    transition: all .3s ease-in-out;
+    padding: 8px 25px;
+    border-width: 2px;
+}
+.btn-group-lg > .btn, .btn-lg {padding: 10px 25px;}
+.srpRefineSearch #accordion ul li a { border-radius: 3px; } /* used on srp refine search section - leave in IF you are removing border radius from all buttons */
+/*------------------------------------*
+    $BTN_CTA
+\*------------------------------------*/
+.btn-cta {
+    color: #fff;
+    background-color: #017fff;
+    border-color: #017fff;
+}
+.btn-cta:hover, .btn-cta:focus, .btn-cta:active, .btn-cta.active, .open > .dropdown-toggle.btn-cta {
+    color: #fff;
+    background-color: #2491ff;
+    border-color: #2491ff;
+}
+/*------------------------------------*
+    $BTN_MAIN
+\*------------------------------------*/
+.btn-main, .btn-alt3.active, .nav .btn-alt3.active /* used on specials pages as tabs */ {
+    color: #fff;
+    background-color: #000;
+    border-color: #000;
+}
+.btn-main:hover, .btn-main:focus, .btn-main:active, .btn-main.active, .open .dropdown-toggle.btn-main {
+    color: #fff;
+    background-color: #333;
+    border-color: #333;
+}
+.showroom .menu .btn-alt3 { background-image: none; } /* used on showroom page, in the left menu section */
+/*------------------------------------*
+    $BTN_ALT1
+\*------------------------------------*/
+.btn-alt1 {
+    color: #000;
+    background-color: #F6F6F6;
+    border-color: #F6F6F6;
+}
+.btn-alt1:hover, .btn-alt1:focus, .btn-alt1:active, .btn-alt1.active, .open .dropdown-toggle.btn-alt1, .nav .btn-alt1:hover, .nav .btn-alt1:focus, .nav .btn-alt1:active, .nav .btn-alt1.active {
+    color: #000;
+    background-color: #F6F6F6;
+    border-color: #F6F6F6;
+}
+/*------------------------------------*
+    $BTN_ALT2
+\*------------------------------------*/
+.btn-alt2 {
+    color: #fff;
+    background-color: #555;
+    border-color: #555;
+}
+.btn-alt2:hover, .btn-alt2:focus, .btn-alt2:active, .btn-alt2.active, .open .dropdown-toggle.btn-alt2, .nav .btn-alt2:hover, .nav .btn-alt2:focus, .nav .btn-alt2:active, .nav .btn-alt2.active {
+    color: #555;
+    background-color: #fff;
+    border-color: #555;
+}
+/*------------------------------------*
+    $BTN_ALT3
+\*------------------------------------*/
+.btn-alt3 {
+    color: #fff;
+    background-color: #666;
+    border-color: #666;
+}
+.btn-alt3:hover, .btn-alt3:focus, .btn-alt3:active, .open .dropdown-toggle.btn-alt3, .nav .btn-alt3:hover, .nav .btn-alt3:focus, .nav .btn-alt3:active {
+    color: #fff;
+    background-color: #444;
+    border-color: #444;
+}
+/*------------------------------------*
+    $BTN_ALT4
+\*------------------------------------*/
+.btn-alt4 {
+    color: #017fff;
+    background-color: transparent;
+    border-color: #017fff;
+    border-width: 1px;
+}
+.btn-alt4:hover, .btn-alt4:focus, .btn-alt4:active {
+    color: #017fff;
+    background-color: #bcdcfc;
+    border-color: #017fff;
+}
+/*------------------------------------*
+    $BTN_ALT5
+\*------------------------------------*/
+.btn-alt5 {
+    color: #fff;
+    background-color: transparent;
+    border-color: #fff;
+    border-width: 1px;
+}
+.btn-alt5:hover, .btn-alt4:focus, .btn-alt4:active {
+    color: #fff;
+    background-color: rgb(255,255,255,.1);
+    border-color: #fff;
+}
+/*------------------------------------*
+    $BTN_NAV1 and $BTN_NAV2
+\*------------------------------------*/
+.btn-nav1, .btn-nav2 {
+    color: #fff;
+    background-color: transparent;
+    border-color: transparent #000 transparent transparent;
+    border-radius: 0;
+}
+.btn-nav1:hover, .btn-nav1:focus, .btn-nav1:active, .btn-nav1.active, .open .dropdown-toggle.btn-nav1, .btn-nav2:hover, .btn-nav2:focus, .btn-nav2:active, .btn-nav2.active, .open .dropdown-toggle.btn-nav2 {
+    color: #fff;
+    background-color: #000;
+    border-color: #000;
+    border-radius: 0;
+}
+/*------------------------------------*
+    $HOME_MISC
+\*------------------------------------*/
+
+
+/*------------------------------------*
+    $HOME_QUICK-NAV
+\*------------------------------------*/
+
+
+/*------------------------------------*
+    $HOME_INVENTORY SEARCH BUTTONS
+\*------------------------------------*/
+
+
+/*------------------------------------*
+    $WIDGET_INVENTORY SEARCH
+\*------------------------------------*/
+
+
+/*------------------------------------*
+    $WIDGET_BANNER
+\*------------------------------------*/
+.bannerLayout02 #inventorySearchWidget { color: #fff; padding: 10px 25px 15px; }
+#inventorySearchWidget .btn-main { background-color: #017fff; border-color: #017fff; color: #fff; }
+#inventorySearchWidget .btn-main:hover { background-color: #2491ff; border-color: #2491ff; color: #fff; }
+
+@media (min-width: 992px) {
+.bannerLayout02 #inventorySearchWidget { background-color: rgba(0,0,0,.85); margin-top: 35px; }
+}
+@media (max-width: 991px) and (min-width: 768px) {
+.bannerLayout02 > .container { width: 100%; }
+}
+@media (max-width: 991px) {
+.bannerLayout02 #inventorySearchWidget { background-color: #000; }
+}
+
+/*------------------------------------*
+    $WIDGET_MODELBAR
+\*------------------------------------*/
+
+
+/*------------------------------------*
+    $FIXED_HEADER
+    jQuery('.headerWrapper').addClass('fixedHeaderArea');
+
+    -add a padding-top to content div based on height of header section (may need multiple media queries)
+\*------------------------------------*/
+@media(min-width:992px) {
+.fixedHeaderArea { background: #fff; }
+.fixedHeaderArea ~ #content { padding-top: 180px; }
+}
+
+/*------------------------------------*
+	$SPECIAL EDITS
+\*------------------------------------*/
+.vdp-vehicle-confirmavailability {display: none !important;}
+
+/*------------------------------------*
+    $MOBILE LEAD DRIVER
+\*------------------------------------*/
+#offerBar {
+    text-align: center;
+    padding: 8px 0;
+}
+#offerBar ul { margin-bottom: 0; }
+#offerBar, #offerBar .h1 { font-size: 20px; }
+
+@media (min-width:768px) and (max-width:1199px) {
+#offerBar, #offerBar .h1 { font-size: 24px; }
+}
+
+@media (min-width:1200px) {
+#offerBar, #offerBar .h1 {
+    font-size: 32px;
+    line-height: 28px;
+}
+}
+/*------------------------------------*
+    $FOOTER
+\*------------------------------------*/
+footer {background: #f0f0f0;}
+/*------------------------------------*
+    $MRP
+\*------------------------------------*/
+#cBlock2 .overlay-panel .row.hidden-xs, #cBlock2 .overlay-panel .row.visible-xs > div:first-of-type { display: none; }
